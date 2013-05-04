@@ -12,16 +12,22 @@ bgImage.onload = function () {
 };
 bgImage.src = "img/background.jpg";
 
+//Quad tree
+var bounds = {
+	x:0,
+	y:0,
+	width:canvas.width,
+	height:canvas.height
+}
+var quad = new QuadTree(bounds);
+
 var positions = [];
 
 // Reset the game when the player catches a monster
 var reset = function () {
-	hero.x = canvas.width / 2;
-	hero.y = canvas.height / 2;
+	var quad = new QuadTree(bounds);
 
-	// Throw the monster somewhere on the screen randomly
-	monster.x = 32 + (Math.random() * (canvas.width - 64));
-	monster.y = 32 + (Math.random() * (canvas.height - 64));
+	
     
     creatures = [];
 };
@@ -31,7 +37,7 @@ var createCreaturesEvery = function( timeout){
         
   function createCreature(){
     addCreature(randomPos());
-    timer = setTimeout(createCreature, timeout);
+    //timer = setTimeout(createCreature, timeout);
   }  
   var timer = setTimeout(createCreature, timeout);
 }
@@ -41,29 +47,41 @@ var addCreature = function(pos){
     newCreature.x = pos.x;
     newCreature.y = pos.y;
     
-    //Add positions by size
-    positions[pos.x, pos.y] = true;
+    
+    quad.insert({
+        x:newCreature.x, 
+        y:newCreature.y,
+        height:newCreature.size,
+        width:newCreature.size
+    });
+    
     creatures.push(newCreature);
 }
 
+/** Generate random pos (not occupied) **/
 var randomPos = function() {
-    var randX = Math.random() * canvas.width();
-    var randY =  Math.random() * canvas.height();
+    var randX = Math.ceil(Math.random() * canvas.width);
+    var randY = Math.ceil( Math.random() * canvas.height);
     
-    if(!occupied(randX, randY)){
-        return {x: randX, y : randY};
+    if(occupied(randX, randY,1) == true ){
+        return randomPos();   
     }else{
-        return rawndomPos();
+        
+        return {x: randX, y : randY};
     }
 }
 
-var occupied = function(x,y){
-    //Do it in and area with circles.
-    if(positions[x,y] == false){
+/** Check if there are nodes occupied for that position **/
+var occupied = function(x,y,size){
+    var items = quad.retrieve({x:x, y:y, height:size, width:size});
+    
+    if(items.length > 0){
         return true;
-    }else{
+    }else {
         return false;
+        
     }
+    
 }
 
 
@@ -79,38 +97,27 @@ function getPoints(x, y, r)
     var ret = [];
     for (var j=x-r; j<=x+r; j++)
        for (var k=y-r; k<=y+r; k++)
-           if (distance({x:j,y:k},{x:x,y:y}) <= r) ret.push({x:j,y:k});
+           if (occupied(j,k,1) == true){
+                if (distance({x:j,y:k},{x:x,y:y}) <= r) ret.push({x:j,y:k});
+           }
+          
+    //Apply alghorithm for getting the nearest point . Quadtree http://www.mikechambers.com/blog/2011/03/21/javascript-quadtree-implementation/
+    //http://en.wikipedia.org/wiki/Quadtree
     return ret;
+}
+
+var randomDirection = function(){
+    
+    return [-1, -1];
+
 }
 
 // Update game objects
 var update = function (modifier) {
     for(var i = 0; i<creatures.length; i++){
-        creatures[i].applyDirection(canvas.width, canvas.height, modifier);
+        creatures[i].randomMove(canvas.width, canvas.height, modifier);
     }
-	if (38 in keysDown) { // Player holding up
-		hero.y -= hero.speed * modifier;
-	}
-	if (40 in keysDown) { // Player holding down
-		hero.y += hero.speed * modifier;
-	}
-	if (37 in keysDown) { // Player holding left
-		hero.x -= hero.speed * modifier;
-	}
-	if (39 in keysDown) { // Player holding right
-		hero.x += hero.speed * modifier;
-	}
-
-	// Are they touching?
-	if (
-		hero.x <= (monster.x + 32)
-		&& monster.x <= (hero.x + 32)
-		&& hero.y <= (monster.y + 32)
-		&& monster.y <= (hero.y + 32)
-	) {
-		++monstersCaught;
-		reset();
-	}
+	
 };
 
 // Draw everything
@@ -118,9 +125,11 @@ var render = function () {
 	if (bgReady) {
 		ctx.drawImage(bgImage, 0, 0);
 	}
-
-	for(var i = 0;  i<creatures.length; i++;){
-        fillRect(creatures[i].x,creatures[i].y,5,5) ;
+    ctx.fillStyle = "black";
+    ctx.strokeStyle = "#000000";
+	for(var i = 0;  i< creatures.length; i++){
+        
+        ctx.fillRect(creatures[i].x,creatures[i].y,5,5) ;
     }
 
 	// Score
@@ -148,10 +157,10 @@ var start = function(){
   
    // Let's play this game!
     reset();
-    var then = Date.now();
-    createCreaturesEvery(2000);
+   
+    createCreaturesEvery(5000);
     setInterval(main, 1); // Execute as fast as possible
    
 }
-
+var then = Date.now();
 start();
