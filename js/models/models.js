@@ -51,9 +51,10 @@ var creature =  function(){
     //this.speed = Math.round( Math.random() * 256);
     this.speed = 256 -  Math.round(Math.random() * 100);
     this.direction = randomDirection();
-    this.getColor = function(){
+    this.getTypeColor = function(){
         return randomColor(this.type);
     }
+    this.color = randomColor();
     
     this.move = function(maxX, maxY, modifier){
         var pointsNear = nearPoints(this);

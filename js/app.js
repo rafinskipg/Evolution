@@ -1,6 +1,6 @@
 // Create the canvas
 var canvas = document.createElement("canvas");
-var ctx = canvas.getContext("2d");
+var context = canvas.getContext("2d");
 canvas.width = 480;
 canvas.height = 500;
 document.getElementById('game').appendChild(canvas);
@@ -146,34 +146,44 @@ var randomDirection = function(){
 }
 
 var randomColor = function(type){
-    if(typeof(type) == 'undefined'){
-        var rnd = Math.round(Math.random() * 5);
+    if(!typeof(type) == 'undefined'){
+        switch(type){
+            case 5: 
+                return 'yellow';
+            break;
+            case 4:
+                return 'pink';
+            break;
+            case 3:
+                return 'blue';
+            break;
+            case 2: 
+                return 'green';
+            break;
+            
+            case 1: 
+                return 'grey';
+            break;
+            case 0:
+                return 'black';
+            break;
+        }
     }else{
-        var rnd = type;
-    }
-    switch(rnd){
-        case 5: 
-            return 'yellow';
-        break;
-        case 4:
-            return 'pink';
-        break;
-        case 3:
-            return 'blue';
-        break;
-        case 2: 
-            return 'green';
-        break;
-        
-        case 1: 
-            return 'grey';
-        break;
-        case 0:
-            return 'black';
-        break;
-    }
-}
+       
+        var h = RandomValue(1, 360);   // color hue between 1 and 360
+        var s = RandomValue(20, 100);  // saturation 0-100%
+        var l = RandomValue(50, 70); 
+        var rgb = 'rgb('+h+','+s+','+l+')';
+        var rgba = 'rgba('+h+','+s+','+l+',0.44)';
+        return {rgb: rgb, rgba: rgba};
 
+    }
+    
+}
+ function RandomValue(MinValue,MaxValue)
+{
+    return parseInt(Math.random()*(MaxValue-MinValue+1), 10)+MinValue;
+}
 // Update game objects
 var update = function (modifier) {
     for(var i = 0; i<creatures.length; i++){
@@ -195,24 +205,28 @@ function updateTree()
 // Draw everything
 var render = function () {
 	if (bgReady) {
-		ctx.drawImage(bgImage, 0, 0);
+		context.drawImage(bgImage, 0, 0);
 	}
     
 	for(var i = 0;  i< creatures.length; i++){
-        ctx.fillStyle = creatures[i].getColor();
-        //ctx.strokeStyle = creatures[i].getColor();
-        ctx.fillRect(creatures[i].x,creatures[i].y,creatures[i].height,creatures[i].width) ;
-        ctx.fillStyle = 'rgba(148, 221, 145, 0.44)';
-        ctx.fillRect(creatures[i].x - creatures[i].sightRadius / 2,creatures[i].y - creatures[i].sightRadius / 2,creatures[i].sightRadius,creatures[i].sightRadius) ;
+        //Sight radius
+        context.beginPath();
+        context.arc(creatures[i].x ,creatures[i].y , creatures[i].sightRadius, 0, 2 * Math.PI, false);
+        context.fillStyle = creatures[i].color.rgba;
+        context.fill();
         
+        //Creature
+        context.fillStyle = creatures[i].color.rgb;
+        context.fillRect(creatures[i].x,creatures[i].y,creatures[i].height,creatures[i].width) ;
+       
     }
 
 	// Score
-	ctx.fillStyle = "green";
-	ctx.font = "24px Helvetica";
-	ctx.textAlign = "left";
-	ctx.textBaseline = "top";
-	ctx.fillText("Creatures: " + creatures.length, 32, 32);
+	context.fillStyle = "green";
+	context.font = "24px Helvetica";
+	context.textAlign = "left";
+	context.textBaseline = "top";
+	context.fillText("Creatures: " + creatures.length, 32, 32);
 };
 
 
