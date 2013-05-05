@@ -51,12 +51,21 @@ var occupied = function(x,y,size){
     }
 }
 
+//Update chart 
+var updateChart = function(){
+    data = [];
+    for(var i = 0; i<creatures.length; i++){
+        data.push({value:creatures[i].eated, color:creatures[i].color.rgb});
+    }
+    chart = new Chart(contextChart).Pie(data,{animation:false});
+}
 
 // Update game objects
 var update = function (modifier) {
     for(var i = 0; i<creatures.length; i++){
         creatures[i].move(canvas.width, canvas.height, modifier);
     }
+    updateChart();
     updateTree();	
 };
 
