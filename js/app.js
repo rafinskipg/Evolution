@@ -1,16 +1,16 @@
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
-canvas.width = 512;
-canvas.height = 480;
-document.body.appendChild(canvas);
+canvas.width = 480;
+canvas.height = 500;
+document.getElementById('game').appendChild(canvas);
 // Background image
 var bgReady = false;
 var bgImage = new Image();
 bgImage.onload = function () {
 	bgReady = true;
 };
-bgImage.src = "img/background.jpg";
+bgImage.src = "img/bg.png";
 
 //Quad tree
 var bounds = {
@@ -23,12 +23,11 @@ var quad = new QuadTree(bounds);
 
 var positions = [];
 
+var then;
+
 // Reset the game when the player catches a monster
 var reset = function () {
 	var quad = new QuadTree(bounds);
-
-	
-    
     creatures = [];
 };
 
@@ -37,7 +36,7 @@ var createCreaturesEvery = function( timeout){
         
   function createCreature(){
     addCreature(randomPos());
-    //timer = setTimeout(createCreature, timeout);
+    timer = setTimeout(createCreature, timeout);
   }  
   var timer = setTimeout(createCreature, timeout);
 }
@@ -47,13 +46,8 @@ var addCreature = function(pos){
     newCreature.x = pos.x;
     newCreature.y = pos.y;
     
-    
-    quad.insert({
-        x:newCreature.x, 
-        y:newCreature.y,
-        height:newCreature.size,
-        width:newCreature.size
-    });
+    quad.insert(newCreature);
+   
     
     creatures.push(newCreature);
 }
@@ -64,7 +58,8 @@ var randomPos = function() {
     var randY = Math.ceil( Math.random() * canvas.height);
     
     if(occupied(randX, randY,1) == true ){
-        return randomPos();   
+       // return randomPos();   
+         return {x: randX, y : randY};
     }else{
         
         return {x: randX, y : randY};
@@ -84,7 +79,21 @@ var occupied = function(x,y,size){
     
 }
 
-
+var nearPoints = function(creature){
+    
+    var items = quad.retrieve({x:creature.x, y:creature.y, height:creature.height, width:creature.width});
+    var temp = [];
+    for(var i = 0; i< items.length; i++){
+        if(items[i] == creature || items[i].type == creature.type ){
+           
+        }else{
+            temp.push(items[i]);
+        }
+    }
+    
+    
+    return temp;
+}
 function distance(p1, p2)
 {
    dx = p2.x - p1.x; dx *= dx;
@@ -97,7 +106,7 @@ function getPoints(x, y, r)
     var ret = [];
     for (var j=x-r; j<=x+r; j++)
        for (var k=y-r; k<=y+r; k++)
-           if (occupied(j,k,1) == true){
+           if (occupied(j,k,1) === true){
                 if (distance({x:j,y:k},{x:x,y:y}) <= r) ret.push({x:j,y:k});
            }
           
@@ -106,38 +115,104 @@ function getPoints(x, y, r)
     return ret;
 }
 
-var randomDirection = function(){
-    
-    return [-1, -1];
 
+var removeCreature = function(creature){
+    for(var i = 0; i < creatures.length; i++){
+        if(creature.x == creatures[i].x && creature.y == creatures[i].y && creature.type == creatures[i].type ){
+        
+            creatures.splice(i, 1);
+            
+        }
+    }
+}
+
+var randomDirection = function(){
+    var flipX = Math.round(Math.random() * 1);
+    var flipY = Math.round(Math.random() * 1);
+    var x, y;
+    if(flipX == 0){
+        x = 1;
+    }else{
+        x = -1;
+    }
+    if(flipY == 0){
+        y = 1;
+    }else{
+        y = -1;
+    }
+    
+    return {x: x, y: y};
+
+}
+
+var randomColor = function(type){
+    if(typeof(type) == 'undefined'){
+        var rnd = Math.round(Math.random() * 5);
+    }else{
+        var rnd = type;
+    }
+    switch(rnd){
+        case 5: 
+            return 'yellow';
+        break;
+        case 4:
+            return 'pink';
+        break;
+        case 3:
+            return 'blue';
+        break;
+        case 2: 
+            return 'green';
+        break;
+        
+        case 1: 
+            return 'grey';
+        break;
+        case 0:
+            return 'black';
+        break;
+    }
 }
 
 // Update game objects
 var update = function (modifier) {
     for(var i = 0; i<creatures.length; i++){
-        creatures[i].randomMove(canvas.width, canvas.height, modifier);
+        creatures[i].move(canvas.width, canvas.height, modifier);
     }
+    updateTree();
 	
 };
+function updateTree()
+{
+	//todo: call clear
 
+	//tree = new QuadTree(bounds);
+	//tree.insert(circles);
+
+	quad.clear();
+	quad.insert(creatures);
+}
 // Draw everything
 var render = function () {
 	if (bgReady) {
 		ctx.drawImage(bgImage, 0, 0);
 	}
-    ctx.fillStyle = "black";
-    ctx.strokeStyle = "#000000";
+    
 	for(var i = 0;  i< creatures.length; i++){
+        ctx.fillStyle = creatures[i].getColor();
+        //ctx.strokeStyle = creatures[i].getColor();
+        ctx.fillRect(creatures[i].x,creatures[i].y,creatures[i].height,creatures[i].width) ;
+        ctx.fillStyle = 'rgba(148, 221, 145, 0.44)';
+        ctx.fillRect(creatures[i].x - creatures[i].sightRadius / 2,creatures[i].y - creatures[i].sightRadius / 2,creatures[i].sightRadius,creatures[i].sightRadius) ;
         
-        ctx.fillRect(creatures[i].x,creatures[i].y,5,5) ;
     }
 
 	// Score
-	ctx.fillStyle = "rgb(250, 250, 250)";
+	ctx.fillStyle = "green";
 	ctx.font = "24px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
-	ctx.fillText("Creatures crated: " + creatures.length, 32, 32);
+	ctx.fillText("Creatures: " + creatures.length, 32, 32);
 };
 
 
@@ -154,13 +229,30 @@ var main = function () {
 };
 
 var start = function(){
-  
+    then = Date.now();
    // Let's play this game!
     reset();
-   
-    createCreaturesEvery(5000);
-    setInterval(main, 1); // Execute as fast as possible
-   
+    addCreature(randomPos());
+    setInterval(main, 5); // Execute as fast as possible
 }
-var then = Date.now();
-start();
+
+//Only place where I do use JQuery. 
+var doBindings = function(){
+    $('#start').bind('click',function(e){
+        e.preventDefault();
+        start();
+        
+    });
+    $('#clear').bind('click',function(e){
+        e.preventDefault();
+        reset();
+    });
+    $('#add').bind('click',function(e){
+        e.preventDefault();
+        addCreature(randomPos());
+    });
+}
+$(document).ready(function(){
+    doBindings();   
+});
+

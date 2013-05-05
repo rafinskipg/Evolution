@@ -1,9 +1,39 @@
+<!DOCTYPE html>
 <html>
     <head>
        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Evolution</title>
+          <!-- CSS FILES -->
+            <!-- This is twitter Bootstrap -->
+            <link href="css/bootstrap.css" rel="stylesheet">
+            <link href="css/bootstrap-responsive.css" rel="stylesheet">
+            <!-- There the page styles -->
+            <link href="css/styles.css" rel="stylesheet">
+        
+        <!-- JS Files -->
+            <!-- This is Jquery -->
+            <script type="text/javascript" src="js/lib/jquery-1.9.1.min.js"></script>  
+            <!-- This is twitter Bootstrap -->            
+            <script type="text/javascript" src="js/lib/bootstrap.js"></script>        
+            <!-- More at bottom of page  -->
     </head>
     <body>
-
+        <div class="container">
+            <header class="row">
+                <h1>Evolution. A canvas JS game</h1>
+            </header>
+            <section class="row">
+                <div id="game" class="span8">
+                
+                </div>
+                <div class=" controls">
+                   
+                    <input class="btn span4" type="submit" id="add" value="Add Creature"/>
+                    <input class="btn span4" type="submit" id="start" value="Start"/>
+                    <input class="btn span4" type="submit" id="clear" value="Clear"/>
+                </div>
+            </section>
+        </div>
     </body>
     
     <script type="text/javascript" src="js/QuadTree.js"></script>  
