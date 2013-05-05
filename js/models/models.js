@@ -1,63 +1,22 @@
-// GAME OBJECTS
-/*var creature = {
-    x : 0,
-    y: 0,
-    size: 1,
-    eated: 0,
-    strongs: [0],
-    type:[0],
-    weakness:[0],
-    speed: 256,
-    randomMove: function(maxX, maxY, modifier){
-        var pointsNear = getPoints(this.x, this.y, 10);
-        // If theres a point near we go into that direction, else we maintain direction
-        if (pointsNear.length > 0){
-           if( pointsNear[0].x > this.x) {
-            this.x += this.speed * modifier;
-           }
-           if( pointsNear[0].y > this.y) {
-            this.y += this.speed * modifier;
-           }
-           if( pointsNear[0].x < this.x) {
-            this.x -= this.speed * modifier;
-           }
-           if( pointsNear[0].y < this.y) {
-            this.y -= this.speed * modifier;
-           }
-           if(this.y == pointsNear[0].y && this.x == pointsNear[0].x){
-                alert('chocked');
-           }
-        }
-        var radius = 50;
-        var items = quad.retrieve({x:this.x, y:this.y, height:this.size + radius, width:this.size + radius});
-        if(items.length > 1){
-            console.log(items);
-        }
-        
-    }   
-}*/
+
 // GAME OBJECTS
 var creature =  function(){
     this.x =  0;
-    this.y=  0;
-    this.height=  4;
-    this.width=  4;
-    this.eated=  0;
-    this.strongs=  [0];
-    this.power =  Math.round( Math.random() * 5);
-    this.type= Math.round( Math.random() * 5);
-    this.sightRadius = Math.round( Math.random() * 300);
-    this.weakness = [0];
-    //this.speed = Math.round( Math.random() * 256);
-    this.speed = 256 -  Math.round(Math.random() * 100);
-    this.direction = randomDirection();
-    this.getTypeColor = function(){
-        return randomColor(this.type);
-    }
-    this.color = randomColor();
+    this.y =  0;
+    this.height =  startingHeight;
+    this.width=  startingWidth;
+    this.eated =  0;
+    this.strongs=  RANDOM.RandomValue(0,15);
+    this.power =  RANDOM.RandomValue(0,5);
+    this.type= RANDOM.RandomValue(0,15);
+    this.sightRadius = RANDOM.RandomValue(0,300);
+    this.weakness = [RANDOM.RandomValue(0,15)];
+    this.speed = RANDOM.RandomValue(40,450);;
+    this.direction = RANDOM.RandomDirection();
+    this.color = RANDOM.RandomColor();
     
     this.move = function(maxX, maxY, modifier){
-        var pointsNear = nearPoints(this);
+        var pointsNear = NearCreatures(this);
        
         // If theres a point near we go into that direction, else we maintain direction
         if (pointsNear.length > 0){
@@ -66,10 +25,8 @@ var creature =  function(){
            var nearestpoint;
            for (var i = 0; i< pointsNear.length; i++){
                 var item = pointsNear[i];
-                var dx = this.x - item.x;
-                var dy = this.y - item.y;
-                var distance = (( dx * dx )  + ( dy * dy )) ;
-                item.distance = distance;
+                item.distance = DISTANCES.Between(this , item) ;
+               
                 if(!nearestpoint){
                     
                     nearestpoint = item;
@@ -105,7 +62,7 @@ var creature =  function(){
                 
              //It can see the other, so go eat it or run
                 //Actually that distance
-           }else if(distance < (this.sightRadius * this.sightRadius)){
+           }else if(nearestpoint.distance < (this.sightRadius * this.sightRadius)){
               
                console.log('SAW YOU');
                var dir = 1;
