@@ -52,12 +52,28 @@ var occupied = function(x,y,size){
 }
 
 //Update chart 
-var updateChart = function(){
+var updatePieChart = function(){
     data = [];
     for(var i = 0; i<creatures.length; i++){
         data.push({value:creatures[i].eated, color:creatures[i].color.rgb});
     }
     chart = new Chart(contextChart).Pie(data,{animation:false});
+}
+var updateRadarChart = function(){
+    data.datasets = [];
+   
+    	
+    for(var i = 0; i<creatures.length; i++){
+        data.datasets.push({
+            fillColor : creatures[i].color.rgba,
+			strokeColor : creatures[i].color.rgb,
+			pointColor : creatures[i].color.rgb,
+			pointStrokeColor : "#fff",
+			data : [creatures[i].initialPower,creatures[i].height,0.1 *creatures[i].speed,creatures[i].power(),0.1 *creatures[i].sightRadius,creatures[i].eated]
+         
+        });
+    }
+    chart = new Chart(contextChart).Radar(data,{animation:false, pointDot: false});
 }
 
 // Update game objects
@@ -65,7 +81,7 @@ var update = function (modifier) {
     for(var i = 0; i<creatures.length; i++){
         creatures[i].move(canvas.width, canvas.height, modifier);
     }
-    updateChart();
+    updateRadarChart();
     updateTree();	
 };
 
@@ -77,6 +93,7 @@ function updateTree()
 
 var reset = function () {
 	var quad = new QuadTree(bounds);
+    
     creatures = [];
 };
 
@@ -126,7 +143,7 @@ var start = function(){
    // Let's play this game!
     reset();
     addCreature(RANDOM.RandomPos());
-    setInterval(main, 5); // Execute as fast as possible
+    setInterval(main, 1); // Execute as fast as possible
 }
 
 //Only place where I do use JQuery. 
@@ -139,6 +156,7 @@ var doBindings = function(){
     $('#clear').bind('click',function(e){
         e.preventDefault();
         reset();
+        addCreature(RANDOM.RandomPos());
     });
     $('#add').bind('click',function(e){
         e.preventDefault();

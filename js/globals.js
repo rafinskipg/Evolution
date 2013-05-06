@@ -40,10 +40,16 @@ var startingWidth = 4;
 
 //Chart options
 //See more at http://www.chartjs.org/docs/
-var data = [
+/*var data = [
 	{
 		value: 0,
 		color:"black"
 	}		
 ]
-var chart = new Chart(contextChart).Pie(data,{animation:false});
+var chart = new Chart(contextChart).Pie(data,{animation:false});*/
+var data = {
+	labels : ["Initial power","Size","Speed","Total power", "Sight Radius", "Eated"],
+	datasets : [
+		
+	]
+}

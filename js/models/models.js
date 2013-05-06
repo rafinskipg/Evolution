@@ -7,11 +7,14 @@ var creature =  function(){
     this.width=  startingWidth;
     this.eated =  0;
     this.strongs=  RANDOM.RandomValue(0,15);
-    this.power =  RANDOM.RandomValue(0,5);
     this.type= RANDOM.RandomValue(0,15);
     this.sightRadius = RANDOM.RandomValue(0,300);
     this.weakness = [RANDOM.RandomValue(0,15)];
-    this.speed = RANDOM.RandomValue(40,450);;
+    this.speed = RANDOM.RandomValue(40,450);
+    this.initialPower =  RANDOM.RandomValue(0,5);
+    this.power = function(){
+        return (this.initialPower * this.height) + (0.02 * this.speed);
+    }
     this.direction = RANDOM.RandomDirection();
     this.color = RANDOM.RandomColor();
     
@@ -46,7 +49,7 @@ var creature =  function(){
            // Points are colliding
            if(colliding){
             
-                if( (this.power * this.height) >  (nearestpoint.power * nearestpoint.height) ){
+                if( (this.power()) >  (nearestpoint.power()) ){
                     this.eated++;
                     this.height++;
                     this.width++;
@@ -64,11 +67,11 @@ var creature =  function(){
                 //Actually that distance
            }else if(nearestpoint.distance < (this.sightRadius * this.sightRadius)){
               
-               console.log('SAW YOU');
+               
                var dir = 1;
-               if(nearestpoint.power * nearestpoint.height > this.power * this.height){
+               if(nearestpoint.power() > this.power()){
                 //Run for your life
-                console.log('I RUN... !');
+                
                 dir = -1;
                }
                
