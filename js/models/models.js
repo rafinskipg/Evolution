@@ -3,8 +3,8 @@
 var creature =  function(){
     this.x =  0;
     this.y =  0;
-    this.height =  startingHeight;
-    this.width=  startingWidth;
+    this.height =  RANDOM.RandomValue(1,4);
+    this.width=   RANDOM.RandomValue(1,4);
     this.eated =  0;
     this.strongs=  RANDOM.RandomValue(0,15);
     this.type= RANDOM.RandomValue(0,15);
@@ -53,7 +53,7 @@ var creature =  function(){
                     this.eated++;
                     this.height++;
                     this.width++;
-                    
+                    this.speed -= 3;
                     removeCreature(nearestpoint);
                     console.log('EATEN!!');
                 }
